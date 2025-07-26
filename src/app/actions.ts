@@ -28,24 +28,26 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
   try {
     const bookRef = doc(db, 'users', userId, 'books', book.id);
     
-    // Create a new object for Firestore to avoid mutating the original
-    // and to ensure type safety.
+    // Create a clean data object for Firestore.
     const bookData: any = {
-      ...book,
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      coverImage: book.coverImage,
+      status: book.status,
+      genre: book.genre,
+      description: book.description || null,
+      rating: book.rating || null,
       dateAdded: serverTimestamp(),
     };
 
-    // Convert dates to Firestore Timestamps only if they exist.
-    if (book.startDate) {
-        bookData.startDate = Timestamp.fromDate(new Date(book.startDate as Date));
-    } else {
-        delete bookData.startDate;
+    // Only add dates if they are valid Date objects.
+    if (book.startDate instanceof Date) {
+        bookData.startDate = Timestamp.fromDate(book.startDate);
     }
     
-    if (book.endDate) {
-        bookData.endDate = Timestamp.fromDate(new Date(book.endDate as Date));
-    } else {
-        delete bookData.endDate;
+    if (book.endDate instanceof Date) {
+        bookData.endDate = Timestamp.fromDate(book.endDate);
     }
 
     await setDoc(bookRef, bookData, { merge: true });
