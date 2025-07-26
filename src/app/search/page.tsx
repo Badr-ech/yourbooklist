@@ -86,9 +86,19 @@ export default function SearchPage() {
 
   const handleAddBook = async (details: BookClient) => {
     if (!selectedBook || !user) return;
+
+    // Correctly merge the base book info with the details from the modal
     const bookToAdd: Book = {
-      ...selectedBook,
-      ...details,
+      id: selectedBook.id,
+      title: selectedBook.title,
+      author: selectedBook.author,
+      coverImage: selectedBook.coverImage,
+      description: selectedBook.description,
+      genre: selectedBook.genre,
+      status: details.status,
+      rating: details.rating,
+      startDate: details.startDate,
+      endDate: details.endDate,
     };
     
     const result = await addBookToList({ userId: user.uid, book: bookToAdd });
