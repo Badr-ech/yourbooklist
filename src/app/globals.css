@@ -7,20 +7,20 @@ body {
 }
 
 @layer base {
-  :root {
+  :root, .theme-default {
     --background: 220 13% 95%;
     --foreground: 224 7.3% 18.2%;
     --card: 0 0% 100%;
     --card-foreground: 224 7.3% 18.2%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 7.3% 18.2%;
-    --primary: 218 48% 51%;
+    --primary: 218 48% 51%; /* Slate Blue */
     --primary-foreground: 210 40% 98%;
     --secondary: 220 13% 91%;
     --secondary-foreground: 224 7.3% 18.2%;
     --muted: 220 13% 91%;
     --muted-foreground: 220 9% 46.1%;
-    --accent: 16 100% 66%;
+    --accent: 16 100% 66%; /* Coral */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -42,6 +42,7 @@ body {
     --sidebar-border: 224 7.3% 25%;
     --sidebar-ring: 218 48% 51%;
   }
+
   .dark {
     --background: 224 7.3% 18.2%;
     --foreground: 210 40% 98%;
@@ -75,6 +76,117 @@ body {
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 220 13% 25%;
     --sidebar-ring: 210 40% 98%;
+  }
+
+  /* Fantasy Theme */
+  .theme-fantasy {
+    --background: 265 39% 12%; /* Deep Purple */
+    --foreground: 265 10% 85%;
+    --card: 265 39% 18%;
+    --card-foreground: 265 10% 85%;
+    --popover: 265 39% 18%;
+    --popover-foreground: 265 10% 85%;
+    --primary: 290 86% 67%; /* Glowing Magenta */
+    --primary-foreground: 265 10% 95%;
+    --secondary: 265 39% 25%;
+    --secondary-foreground: 265 10% 95%;
+    --muted: 265 39% 25%;
+    --muted-foreground: 265 10% 65%;
+    --accent: 250 100% 75%; /* Glowing Lavender */
+    --accent-foreground: 265 39% 5%;
+    --border: 265 39% 30%;
+    --input: 265 39% 30%;
+    --ring: 290 86% 67%;
+  }
+
+  /* Romance Theme */
+  .theme-romance {
+    --background: 350 100% 98%; /* Light Pink */
+    --foreground: 345 50% 25%;
+    --card: 350 100% 100%;
+    --card-foreground: 345 50% 25%;
+    --primary: 340 82% 60%; /* Soft Red */
+    --primary-foreground: 350 100% 98%;
+    --secondary: 350 100% 94%;
+    --secondary-foreground: 345 50% 25%;
+    --accent: 330 80% 70%; /* Pastel Pink */
+    --accent-foreground: 345 50% 15%;
+    --border: 350 100% 90%;
+    --input: 350 100% 90%;
+    --ring: 340 82% 60%;
+  }
+
+  /* Sci-Fi Theme */
+  .theme-scifi {
+    --background: 222 47% 11%; /* Dark Blue */
+    --foreground: 210 40% 98%;
+    --card: 222 47% 15%;
+    --card-foreground: 210 40% 98%;
+    --primary: 175 100% 50%; /* Neon Cyan */
+    --primary-foreground: 222 47% 5%;
+    --secondary: 222 47% 20%;
+    --secondary-foreground: 210 40% 98%;
+    --accent: 190 100% 50%; /* Neon Teal */
+    --accent-foreground: 222 47% 5%;
+    --border: 222 47% 25%;
+    --input: 222 47% 25%;
+    --ring: 175 100% 50%;
+  }
+  
+  /* Horror Theme */
+  .theme-horror {
+    --background: 0 0% 8%; /* Near Black */
+    --foreground: 0 0% 90%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 90%;
+    --primary: 0 100% 50%; /* Bright Red */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 90%;
+    --accent: 0 80% 40%; /* Darker Red */
+    --accent-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 100% 50%;
+    --radius: 0.1rem;
+  }
+  
+  /* Thriller Theme */
+  .theme-thriller {
+    --background: 210 30% 15%; /* Muted Dark Blue */
+    --foreground: 210 15% 80%;
+    --card: 210 30% 20%;
+    --card-foreground: 210 15% 80%;
+    --primary: 200 80% 60%; /* Bold Cyan */
+    --primary-foreground: 210 30% 10%;
+    --secondary: 210 30% 25%;
+    --secondary-foreground: 210 15% 80%;
+    --accent: 210 40% 40%; /* Steel Blue */
+    --accent-foreground: 210 15% 95%;
+    --border: 210 30% 30%;
+    --input: 210 30% 30%;
+    --ring: 200 80% 60%;
+  }
+
+  /* Historical Theme */
+  .theme-historical {
+    --background: 45 50% 96%; /* Cream */
+    --foreground: 35 40% 20%;
+    --card: 45 50% 92%;
+    --card-foreground: 35 40% 20%;
+    --primary: 40 80% 40%; /* Gold */
+    --primary-foreground: 45 50% 98%;
+    --secondary: 45 50% 90%;
+    --secondary-foreground: 35 40% 20%;
+    --accent: 35 60% 60%; /* Old Gold */
+    --accent-foreground: 35 40% 10%;
+    --border: 45 50% 85%;
+    --input: 45 50% 85%;
+    --ring: 40 80% 40%;
+  }
+
+  .theme-romance {
+    font-family: 'Lora', serif;
   }
 }
 
