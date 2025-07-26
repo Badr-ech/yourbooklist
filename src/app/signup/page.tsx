@@ -10,11 +10,14 @@ import { useState, type FormEvent } from 'react';
 import { Logo } from '@/components/logo';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { auth, db } from '@/lib/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import { handleGoogleSignIn } from '../actions';
+import { Separator } from '@/components/ui/separator';
+import { FaGoogle } from 'react-icons/fa';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -63,6 +66,30 @@ export default function SignupPage() {
         setError('An unexpected error occurred. Please try again.');
       }
       console.error(err);
+    }
+  };
+
+  const onGoogleSignIn = async () => {
+    setError(null);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      const res = await handleGoogleSignIn({ uid: user.uid, email: user.email });
+      if (!res.success) {
+        setError(res.error);
+        return;
+      }
+
+      toast({
+        title: 'Account created!',
+        description: "You've successfully signed up with Google.",
+      });
+      router.push('/dashboard');
+    } catch (err: any) {
+      console.error(err);
+      setError('Failed to sign up with Google. Please try again.');
     }
   };
 
@@ -136,6 +163,17 @@ export default function SignupPage() {
               Create account
             </Button>
           </form>
+          
+          <div className="relative my-4">
+            <Separator />
+            <span className="absolute left-1/2 -translate-x-1/2 top-[-10px] bg-card px-2 text-xs text-muted-foreground">OR</span>
+          </div>
+
+          <Button variant="outline" className="w-full" onClick={onGoogleSignIn}>
+            <FaGoogle className="mr-2 h-4 w-4" />
+            Sign up with Google
+          </Button>
+
           <div className="mt-4 text-center text-sm">
             Already have an account?{' '}
             <Link href="/login" className="underline">

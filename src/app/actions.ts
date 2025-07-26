@@ -6,7 +6,7 @@ import {
 } from '@/ai/flows/generate-book-recommendations';
 import { db } from '@/lib/firebase';
 import { Book } from '@/lib/types';
-import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection, getDoc } from 'firebase/firestore';
 
 export async function getBookRecommendations(input: GenerateBookRecommendationsInput) {
   try {
@@ -55,6 +55,28 @@ export async function addBookToWishlist({ userId, book }: { userId: string, book
     return {
       success: false,
       error: 'An unexpected error occurred while adding to wishlist.',
+    };
+  }
+}
+
+export async function handleGoogleSignIn({ uid, email }: { uid: string; email: string | null }) {
+  try {
+    const userDocRef = doc(db, 'users', uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      await setDoc(userDocRef, {
+        uid: uid,
+        email: email,
+        favoriteGenre: 'Fantasy', // Default genre for new Google users
+      });
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Error handling Google sign-in:', error);
+    return {
+      success: false,
+      error: 'An unexpected error occurred during sign-in.',
     };
   }
 }

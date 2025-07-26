@@ -9,10 +9,13 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { Logo } from '@/components/logo';
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import { handleGoogleSignIn } from '../actions';
+import { Separator } from '@/components/ui/separator';
+import { FaGoogle } from 'react-icons/fa';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,6 +41,30 @@ export default function LoginPage() {
         setError('An unexpected error occurred. Please try again.');
       }
       console.error(err);
+    }
+  };
+
+  const onGoogleSignIn = async () => {
+    setError(null);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      const res = await handleGoogleSignIn({ uid: user.uid, email: user.email });
+      if (!res.success) {
+        setError(res.error);
+        return;
+      }
+
+      toast({
+        title: 'Logged in with Google!',
+        description: "You've successfully logged in.",
+      });
+      router.push('/dashboard');
+    } catch (err: any) {
+      console.error(err);
+      setError('Failed to sign in with Google. Please try again.');
     }
   };
 
@@ -87,6 +114,17 @@ export default function LoginPage() {
               Login
             </Button>
           </form>
+
+          <div className="relative my-4">
+            <Separator />
+            <span className="absolute left-1/2 -translate-x-1/2 top-[-10px] bg-card px-2 text-xs text-muted-foreground">OR</span>
+          </div>
+          
+          <Button variant="outline" className="w-full" onClick={onGoogleSignIn}>
+            <FaGoogle className="mr-2 h-4 w-4" />
+            Sign in with Google
+          </Button>
+
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
             <Link href="/signup" className="underline">
