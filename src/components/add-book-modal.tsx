@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, Star } from 'lucide-react';
 import { useState } from 'react';
-import type { Book, BookStatus } from '@/lib/types';
+import type { Book, BookStatus, BookClient } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -23,7 +23,7 @@ interface AddBookModalProps {
   isOpen: boolean;
   onClose: () => void;
   book: Book;
-  onAddBook: (details: { status: BookStatus; rating?: number; startDate?: Date; endDate?: Date }) => Promise<void>;
+  onAddBook: (details: BookClient) => Promise<void>;
 }
 
 export function AddBookModal({ isOpen, onClose, book, onAddBook }: AddBookModalProps) {

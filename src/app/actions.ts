@@ -6,7 +6,7 @@ import {
 } from '@/ai/flows/generate-book-recommendations';
 import { db } from '@/lib/firebase';
 import { Book } from '@/lib/types';
-import { doc, setDoc, serverTimestamp, collection, getDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection, getDoc, Timestamp } from 'firebase/firestore';
 
 export async function getBookRecommendations(input: GenerateBookRecommendationsInput) {
   try {
@@ -27,7 +27,31 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
   }
   try {
     const bookRef = doc(db, 'users', userId, 'books', book.id);
-    await setDoc(bookRef, { ...book, dateAdded: serverTimestamp() }, { merge: true });
+    
+    // Create a copy of the book object to avoid mutating the original
+    const bookData: Omit<Book, 'startDate' | 'endDate'> & {
+        startDate?: Timestamp;
+        endDate?: Timestamp;
+        dateAdded: any;
+    } = {
+        ...book,
+        dateAdded: serverTimestamp(),
+    };
+
+    // Convert dates to Firestore Timestamps or remove if undefined
+    if (book.startDate) {
+        bookData.startDate = Timestamp.fromDate(new Date(book.startDate));
+    } else {
+        delete (bookData as Partial<Book>).startDate;
+    }
+    
+    if (book.endDate) {
+        bookData.endDate = Timestamp.fromDate(new Date(book.endDate));
+    } else {
+        delete (bookData as Partial<Book>).endDate;
+    }
+
+    await setDoc(bookRef, bookData, { merge: true });
     return { success: true };
   } catch (error) {
     console.error('Error adding book to list:', error);

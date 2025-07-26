@@ -5,7 +5,7 @@ import { BookCard } from '@/components/book-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import type { Book, BookStatus } from '@/lib/types';
+import type { Book, BookClient } from '@/lib/types';
 import { PlusCircle, Search as SearchIcon, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { AddBookModal } from '@/components/add-book-modal';
@@ -84,9 +84,9 @@ export default function SearchPage() {
     setIsModalOpen(false);
   };
 
-  const handleAddBook = async (details: { status: BookStatus; rating?: number; startDate?: Date; endDate?: Date }) => {
+  const handleAddBook = async (details: BookClient) => {
     if (!selectedBook || !user) return;
-    const bookToAdd = {
+    const bookToAdd: Book = {
       ...selectedBook,
       ...details,
     };
