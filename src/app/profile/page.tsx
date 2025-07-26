@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useAuth } from '@/components/auth-provider';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { collection, doc, getDoc, onSnapshot, query, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,7 +31,7 @@ type UserProfile = {
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
@@ -45,25 +45,30 @@ export default function ProfilePage() {
     }
   }, [user, authLoading, router]);
 
-  useEffect(() => {
-    async function fetchProfile() {
-      if (user) {
+  const fetchProfileData = useCallback(async () => {
+    if (user) {
+      try {
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data() as UserProfile;
           setProfile(data);
-          setSelectedGenre(data.favoriteGenre);
+          setSelectedGenre(data.favoriteGenre || '');
+        } else {
+           console.log("No such document!");
+           setProfile(null); // Explicitly set to null if not found
         }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setProfile(null);
       }
     }
-    if (!authLoading && user) {
-      fetchProfile();
-    }
-  }, [user, authLoading]);
-  
+  }, [user]);
+
   useEffect(() => {
     if (user) {
+      fetchProfileData();
+      
       const q = query(collection(db, 'users', user.uid, 'books'));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const userBooks: Book[] = [];
@@ -71,17 +76,23 @@ export default function ProfilePage() {
           userBooks.push({ id: doc.id, ...doc.data() } as Book);
         });
         setBooks(userBooks);
+        setLoading(false); // Set loading to false after both profile and books are likely fetched
+      }, (error) => {
+        console.error("Error fetching books:", error);
         setLoading(false);
       });
 
       return () => unsubscribe();
+    } else if (!authLoading) {
+        setLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading, fetchProfileData]);
+
 
   const stats = useMemo(() => {
     const totalBooks = books.length;
     const booksCompleted = books.filter(b => b.status === 'completed').length;
-    const ratedBooks = books.filter(b => typeof b.rating === 'number');
+    const ratedBooks = books.filter(b => typeof b.rating === 'number' && b.rating > 0);
     const averageRating = ratedBooks.length > 0 
       ? ratedBooks.reduce((acc, b) => acc + b.rating!, 0) / ratedBooks.length
       : 0;
@@ -107,7 +118,7 @@ export default function ProfilePage() {
       await updateDoc(userDocRef, {
         favoriteGenre: selectedGenre,
       });
-      setTheme(selectedGenre.toLowerCase());
+      setTheme(selectedGenre.toLowerCase() as any);
       setProfile((prev) => (prev ? { ...prev, favoriteGenre: selectedGenre } : null));
       toast({
         title: 'Success!',
@@ -264,7 +275,7 @@ export default function ProfilePage() {
             </div>
           </>
         ) : (
-          <p>Could not load profile.</p>
+          <p>Could not load profile. If you've just signed up, please try refreshing the page.</p>
         )}
       </div>
     </AppLayout>
