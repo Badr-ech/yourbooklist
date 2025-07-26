@@ -35,6 +35,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
+      // Query books ordered by dateAdded
       const q = query(collection(db, 'users', user.uid, 'books'), orderBy('dateAdded', 'desc'));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const userBooks: Book[] = [];
@@ -42,6 +43,9 @@ export default function DashboardPage() {
           userBooks.push({ id: doc.id, ...doc.data() } as Book);
         });
         setBooks(userBooks);
+        setLoading(false);
+      }, (error) => {
+        console.error("Error fetching books:", error);
         setLoading(false);
       });
 
@@ -58,6 +62,7 @@ export default function DashboardPage() {
     let sorted = [...filtered];
     switch (sortOption) {
       case 'rating':
+        // Books with no rating are pushed to the end
         sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
       case 'title':
@@ -65,7 +70,7 @@ export default function DashboardPage() {
         break;
       case 'dateAdded':
       default:
-        // Already sorted by dateAdded desc by default from query
+        // Already sorted by dateAdded desc by the Firestore query
         break;
     }
     return sorted;

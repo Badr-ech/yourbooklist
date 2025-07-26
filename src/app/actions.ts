@@ -29,7 +29,7 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
   try {
     const bookRef = doc(db, 'users', userId, 'books', book.id);
     
-    // Explicitly construct the data object to avoid undefined fields
+    // Explicitly construct the data object to avoid undefined or invalid fields
     const bookData: any = {
       id: book.id,
       title: book.title,
@@ -38,15 +38,13 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
       status: book.status,
       genre: book.genre,
       description: book.description || null,
-      dateAdded: serverTimestamp(),
+      dateAdded: serverTimestamp(), // Ensures this field is always present for sorting
     };
     
-    // Only add rating if it's a number
-    if (typeof book.rating === 'number') {
+    if (typeof book.rating === 'number' && !isNaN(book.rating)) {
         bookData.rating = book.rating;
     }
-
-    // Only add dates if they exist
+    
     if (book.startDate) {
         bookData.startDate = Timestamp.fromDate(new Date(book.startDate));
     }
@@ -63,7 +61,7 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
     console.error('[actions.ts] Firestore error adding book:', error);
     return {
       success: false,
-      error: 'An unexpected error occurred while adding the book. Check server console for details.',
+      error: `An unexpected error occurred while adding the book. Details: ${error.message}`,
     };
   }
 }
