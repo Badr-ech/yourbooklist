@@ -45,48 +45,50 @@ export default function ProfilePage() {
     }
   }, [user, authLoading, router]);
 
-  const fetchProfileData = useCallback(async () => {
-    if (user) {
-      try {
-        const docRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data() as UserProfile;
-          setProfile(data);
-          setSelectedGenre(data.favoriteGenre || '');
-        } else {
-           console.log("No such document!");
-           setProfile(null); // Explicitly set to null if not found
-        }
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        setProfile(null);
-      }
-    }
-  }, [user]);
-
   useEffect(() => {
     if (user) {
-      fetchProfileData();
-      
-      const q = query(collection(db, 'users', user.uid, 'books'));
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const userBooks: Book[] = [];
-        querySnapshot.forEach((doc) => {
-          userBooks.push({ id: doc.id, ...doc.data() } as Book);
-        });
-        setBooks(userBooks);
-        setLoading(false); // Set loading to false after both profile and books are likely fetched
-      }, (error) => {
-        console.error("Error fetching books:", error);
-        setLoading(false);
-      });
+      const fetchProfileAndBooks = async () => {
+        setLoading(true);
+        try {
+          // Fetch profile
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data() as UserProfile;
+            setProfile(data);
+            setSelectedGenre(data.favoriteGenre || '');
+          } else {
+             console.log("No such document!");
+             setProfile(null);
+          }
+        } catch (error) {
+            console.error("Error fetching profile:", error);
+            setProfile(null);
+        }
 
-      return () => unsubscribe();
+        // Setup book listener
+        const q = query(collection(db, 'users', user.uid, 'books'));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const userBooks: Book[] = [];
+          querySnapshot.forEach((doc) => {
+            userBooks.push({ id: doc.id, ...doc.data() } as Book);
+          });
+          setBooks(userBooks);
+          setLoading(false); // Combined loading state
+        }, (error) => {
+          console.error("Error fetching books:", error);
+          setLoading(false);
+        });
+
+        return () => unsubscribe();
+      };
+      
+      fetchProfileAndBooks();
+
     } else if (!authLoading) {
-        setLoading(false);
+      setLoading(false);
     }
-  }, [user, authLoading, fetchProfileData]);
+  }, [user, authLoading]);
 
 
   const stats = useMemo(() => {
