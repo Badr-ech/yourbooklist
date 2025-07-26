@@ -1,10 +1,10 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  apiKey: "AIzaSyDHeegNk_omjNiEgC2qArnk0sg2oK9vlVI",
   authDomain: "yourbooklist.firebaseapp.com",
   projectId: "yourbooklist",
   storageBucket: "yourbooklist.firebasestorage.app",
@@ -16,6 +16,8 @@ const firebaseConfig = {
 let app;
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
 }
 
 const auth = getAuth(app);
