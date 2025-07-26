@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Lightbulb,
   LogOut,
+  Newspaper,
   Search,
   User,
 } from 'lucide-react';
@@ -30,6 +31,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/recommendations', label: 'Recommendations', icon: Lightbulb },
     { href: '/search', label: 'Search', icon: Search },
+    { href: '/news', label: 'News', icon: Newspaper },
     { href: '/profile', label: 'Profile', icon: User },
   ];
 

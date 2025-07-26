@@ -99,3 +99,51 @@ export const userProfile = {
   avatar: 'https://placehold.co/100x100.png',
   favoriteGenres: ['Sci-Fi', 'Fantasy', 'Classic', 'Dystopian', 'Non-Fiction'],
 };
+
+export const mockNewsFeed = [
+    {
+      id: '1',
+      title: 'Annual Literary Gala Celebrates New Voices in Fiction',
+      summary: 'The 25th Annual Literary Gala honored three debut novelists, highlighting a trend towards more diverse and experimental narratives in the publishing world.',
+      link: '#',
+    },
+    {
+      id: '2',
+      title: 'Lost Manuscript of a Famous 20th-Century Author Discovered',
+      summary: 'A previously unknown manuscript by the late, celebrated author has been found in an old university archive, promising a new addition to their influential body of work.',
+      link: '#',
+    },
+    {
+      id: '3',
+      title: 'Book-to-Screen Adaptations Dominate Streaming Services This Fall',
+      summary: 'A look at the upcoming wave of adaptations, from fantasy epics to historical dramas, and what it means for the relationship between literature and film.',
+      link: '#',
+    },
+];
+
+export const mockUpcomingReleases = [
+    {
+        id: 'ur1',
+        title: 'The Stardust Weaver',
+        author: 'Elara Vance',
+        genre: 'Fantasy',
+        releaseDate: 'October 15, 2024',
+        coverImage: 'https://placehold.co/300x450.png'
+    },
+    {
+        id: 'ur2',
+        title: 'Echoes of Andromeda',
+        author: 'Kaelen Rourke',
+        genre: 'Sci-Fi',
+        releaseDate: 'November 5, 2024',
+        coverImage: 'https://placehold.co/300x450.png'
+    },
+    {
+        id: 'ur3',
+        title: 'The Crimson Cipher',
+        author: 'Juliana Croft',
+        genre: 'Thriller',
+        releaseDate: 'December 3, 2024',
+        coverImage: 'https://placehold.co/300x450.png'
+    },
+];

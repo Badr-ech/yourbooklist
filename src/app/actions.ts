@@ -6,7 +6,7 @@ import {
 } from '@/ai/flows/generate-book-recommendations';
 import { db } from '@/lib/firebase';
 import { Book } from '@/lib/types';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 
 export async function getBookRecommendations(input: GenerateBookRecommendationsInput) {
   try {
@@ -34,6 +34,27 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
     return {
       success: false,
       error: 'An unexpected error occurred while adding the book.',
+    };
+  }
+}
+
+export async function addBookToWishlist({ userId, book }: { userId: string, book: Omit<Book, 'status'> }) {
+  if (!userId) {
+    return { success: false, error: 'User not authenticated.' };
+  }
+  try {
+    const wishlistRef = doc(collection(db, 'users', userId, 'wishlist'), book.id);
+    await setDoc(wishlistRef, { 
+        ...book, 
+        status: 'plan-to-read',
+        dateAdded: serverTimestamp() 
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding book to wishlist:', error);
+    return {
+      success: false,
+      error: 'An unexpected error occurred while adding to wishlist.',
     };
   }
 }
