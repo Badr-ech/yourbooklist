@@ -7,20 +7,15 @@ const firebaseConfig = {
   apiKey: "AIzaSyDHeegNk_omjNiEgC2qArnk0sg2oK9vlVI",
   authDomain: "yourbooklist.firebaseapp.com",
   projectId: "yourbooklist",
-  storageBucket: "yourbooklist.firebasestorage.app",
+  storageBucket: "yourbooklist.appspot.com",
   messagingSenderId: "346940629232",
   appId: "1:346940629232:web:0be603523d07c0bffea235",
 };
 
 // Initialize Firebase
-let app;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
-}
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export { auth, db };
+export { app, auth, db };

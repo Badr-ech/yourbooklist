@@ -29,7 +29,17 @@ export function ThemeProvider({
   storageKey?: string;
 }) {
   const { user, loading: authLoading } = useAuth();
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+  const [theme, setThemeState] = useState<Theme>(() => {
+     if (typeof window !== 'undefined') {
+      return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+    }
+    return defaultTheme;
+  });
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const applyTheme = useCallback((themeToApply: Theme) => {
     const root = window.document.documentElement;
@@ -54,12 +64,6 @@ export function ThemeProvider({
     root.classList.add(finalThemeClass);
   }, []);
 
-  useEffect(() => {
-    const storedTheme = localStorage.getItem(storageKey) as Theme;
-    if (storedTheme) {
-      setThemeState(storedTheme);
-    }
-  }, [storageKey]);
 
   useEffect(() => {
     async function fetchAndApplyUserTheme() {
@@ -74,29 +78,37 @@ export function ThemeProvider({
             }
           }
         } catch (e) {
-          // When the user is not authenticated, reading from firestore will fail.
-          // We can ignore this error.
+          console.error("Failed to fetch user theme", e);
         }
       }
     }
-    if (!authLoading) {
+    if (isClient && !authLoading) {
       fetchAndApplyUserTheme();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, isClient]);
   
   useEffect(() => {
-    applyTheme(theme);
-    localStorage.setItem(storageKey, theme);
-  }, [theme, storageKey, applyTheme]);
+    if(isClient) {
+      applyTheme(theme);
+      localStorage.setItem(storageKey, theme);
+    }
+  }, [theme, storageKey, applyTheme, isClient]);
 
   const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
+     if(isClient) {
+        setThemeState(newTheme);
+        localStorage.setItem(storageKey, newTheme);
+     }
   };
 
   const value = {
     theme,
     setTheme,
   };
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <ThemeProviderContext.Provider value={value}>
