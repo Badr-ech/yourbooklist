@@ -21,6 +21,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import type { Book } from '@/lib/types';
 import { BookOpenCheck, Star, TrendingUp } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type UserProfile = {
   email: string;
@@ -29,6 +30,7 @@ type UserProfile = {
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -36,6 +38,12 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string>('');
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -49,7 +57,7 @@ export default function ProfilePage() {
         }
       }
     }
-    if (!authLoading) {
+    if (!authLoading && user) {
       fetchProfile();
     }
   }, [user, authLoading]);
@@ -154,6 +162,19 @@ export default function ProfilePage() {
 
   const genreOptions = ['Fantasy', 'Romance', 'Sci-Fi', 'Horror', 'Thriller', 'Historical'];
 
+  if (authLoading || loading) {
+    return (
+        <AppLayout>
+            <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2">
+                <h2 className="text-3xl font-bold tracking-tight">Profile</h2>
+                </div>
+                <ProfileSkeleton />
+            </div>
+        </AppLayout>
+    )
+  }
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -161,9 +182,7 @@ export default function ProfilePage() {
           <h2 className="text-3xl font-bold tracking-tight">Profile</h2>
         </div>
 
-        {loading || authLoading ? (
-          <ProfileSkeleton />
-        ) : profile ? (
+        {profile ? (
           <>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                <Card className="lg:col-span-1">

@@ -12,9 +12,11 @@ import { AddBookModal } from '@/components/add-book-modal';
 import { useDebounce } from '@/hooks/use-debounce';
 import { addBookToList } from '../actions';
 import { useAuth } from '@/components/auth-provider';
+import { useRouter } from 'next/navigation';
 
 export default function SearchPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,6 +25,12 @@ export default function SearchPage() {
   const { toast } = useToast();
 
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (!debouncedSearchTerm) {
@@ -61,8 +69,10 @@ export default function SearchPage() {
       }
     };
 
-    fetchBooks();
-  }, [debouncedSearchTerm, toast]);
+    if (user) {
+        fetchBooks();
+    }
+  }, [debouncedSearchTerm, toast, user]);
 
   const handleOpenModal = (book: Book) => {
     setSelectedBook(book);
@@ -97,6 +107,16 @@ export default function SearchPage() {
       });
     }
   };
+
+  if (authLoading || !user) {
+      return (
+          <AppLayout>
+              <div className="flex justify-center items-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+          </AppLayout>
+      )
+  }
 
   return (
     <AppLayout>

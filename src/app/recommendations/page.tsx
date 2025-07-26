@@ -5,15 +5,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getBookRecommendations } from '../actions';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/components/auth-provider';
+import { useRouter } from 'next/navigation';
 
 export default function RecommendationsPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [readingHistory, setReadingHistory] = useState('I enjoyed "Dune" for its world-building and political intrigue, and "Project Hail Mary" for its clever problem-solving and humor.');
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,13 +41,23 @@ export default function RecommendationsPage() {
     setLoading(false);
   };
 
+  if (authLoading || !user) {
+      return (
+          <AppLayout>
+              <div className="flex justify-center items-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+          </AppLayout>
+      )
+  }
+
   return (
     <AppLayout>
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">AI Recommendations</h2>
       </div>
       <p className="text-muted-foreground">
-        Tell us about books you&apos;ve enjoyed, and our AI will suggest what to read next.
+        Tell us about books you've enjoyed, and our AI will suggest what to read next.
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
