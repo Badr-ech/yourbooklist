@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export type BookStatus = 'reading' | 'completed' | 'on-hold' | 'dropped' | 'plan-to-read';
 
 export interface Book {
@@ -7,6 +9,9 @@ export interface Book {
   coverImage: string;
   status: BookStatus;
   genre: string;
-  rating?: number;
-  dateAdded?: any; // Using 'any' for Firestore ServerTimestamp
+  description?: string;
+  rating?: number; // 1-10 scale
+  startDate?: Timestamp;
+  endDate?: Timestamp;
+  dateAdded?: Timestamp;
 }

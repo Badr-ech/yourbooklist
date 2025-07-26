@@ -9,6 +9,7 @@ export const mockBooks: Book[] = [
     coverImage: 'https://placehold.co/300x450.png',
     status: 'reading',
     genre: 'Sci-Fi',
+    description: 'The story of Paul Atreides, a young nobleman whose family accepts the stewardship of the desert planet Arrakis.',
   },
   {
     id: '2',
@@ -17,6 +18,7 @@ export const mockBooks: Book[] = [
     coverImage: 'https://placehold.co/300x450.png',
     status: 'reading',
     genre: 'Fantasy',
+    description: 'A reluctant hobbit, Bilbo Baggins, sets out to the Lonely Mountain with a spirited group of dwarves to reclaim their mountain home, and treasure within it, from the dragon Smaug.',
   },
   // Read
   {
@@ -24,40 +26,45 @@ export const mockBooks: Book[] = [
     title: 'Project Hail Mary',
     author: 'Andy Weir',
     coverImage: 'https://placehold.co/300x450.png',
-    status: 'read',
+    status: 'completed',
     genre: 'Sci-Fi',
+    rating: 9,
+    description: 'Ryland Grace is the sole survivor on a desperate, last-chance mission—and if he fails, humanity and the earth itself will perish.',
   },
   {
     id: '4',
     title: 'To Kill a Mockingbird',
     author: 'Harper Lee',
     coverImage: 'https://placehold.co/300x450.png',
-    status: 'read',
+    status: 'completed',
     genre: 'Classic',
+    rating: 8,
   },
   {
     id: '5',
     title: '1984',
     author: 'George Orwell',
     coverImage: 'https://placehold.co/300x450.png',
-    status: 'read',
+    status: 'completed',
     genre: 'Dystopian',
+    rating: 9,
   },
   {
     id: '6',
     title: 'Pride and Prejudice',
     author: 'Jane Austen',
     coverImage: 'https://placehold.co/300x450.png',
-    status: 'read',
+    status: 'completed',
     genre: 'Romance',
+    rating: 7,
   },
-  // Wishlist
+  // Plan to Read
   {
     id: '7',
     title: 'The Three-Body Problem',
     author: 'Cixin Liu',
     coverImage: 'https://placehold.co/300x450.png',
-    status: 'wishlist',
+    status: 'plan-to-read',
     genre: 'Sci-Fi',
   },
   {
@@ -65,7 +72,7 @@ export const mockBooks: Book[] = [
     title: 'The Name of the Wind',
     author: 'Patrick Rothfuss',
     coverImage: 'https://placehold.co/300x450.png',
-    status: 'wishlist',
+    status: 'plan-to-read',
     genre: 'Fantasy',
   },
   {
@@ -73,7 +80,7 @@ export const mockBooks: Book[] = [
     title: 'Sapiens: A Brief History of Humankind',
     author: 'Yuval Noah Harari',
     coverImage: 'https://placehold.co/300x450.png',
-    status: 'wishlist',
+    status: 'plan-to-read',
     genre: 'Non-Fiction',
   },
   {
@@ -81,7 +88,7 @@ export const mockBooks: Book[] = [
     title: 'The Midnight Library',
     author: 'Matt Haig',
     coverImage: 'https://placehold.co/300x450.png',
-    status: 'wishlist',
+    status: 'plan-to-read',
     genre: 'Contemporary Fiction',
   },
 ];
