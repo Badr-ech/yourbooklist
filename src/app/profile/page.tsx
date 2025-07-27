@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useAuth } from '@/components/auth-provider';
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { collection, doc, getDoc, onSnapshot, query, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, query, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTheme } from '@/components/theme-provider';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -19,14 +21,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import type { Book } from '@/lib/types';
-import { BookOpenCheck, Star, TrendingUp } from 'lucide-react';
+import { ReadingStatsDisplay } from '@/components/reading-stats-display';
+import { ReadingGoalManager } from '@/components/reading-goal-manager';
+import type { Book, UserProfile, ReadingStats } from '@/lib/types';
+import { calculateReadingStats } from '@/lib/reading-stats';
+import { BookOpenCheck, Star, TrendingUp, User, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-type UserProfile = {
-  email: string;
-  favoriteGenre: string;
-};
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -38,6 +39,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
+  const [bio, setBio] = useState<string>('');
+  const [readingGoal, setReadingGoal] = useState<number>(0);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -57,12 +61,34 @@ export default function ProfilePage() {
             const data = docSnap.data() as UserProfile;
             setProfile(data);
             setSelectedGenre(data.favoriteGenre || '');
+            setUsername(data.username || '');
+            setBio(data.bio || '');
+            setReadingGoal(data.readingGoal || 0);
           } else {
-             console.log("No such document!");
-             setProfile(null);
+            console.log("No profile document found, creating one...");
+            // Create a basic profile if it doesn't exist
+            const defaultUsername = user.email?.split('@')[0] || 'User';
+            const newProfile: UserProfile = {
+              email: user.email || '',
+              username: defaultUsername,
+              favoriteGenre: 'Fantasy',
+              bio: '',
+              joinedDate: serverTimestamp() as any,
+              isPublic: true,
+              readingGoal: 0,
+              currentYear: new Date().getFullYear(),
+            };
+            
+            // Create the profile document
+            await setDoc(docRef, newProfile);
+            setProfile(newProfile);
+            setSelectedGenre(newProfile.favoriteGenre);
+            setUsername(newProfile.username);
+            setBio(newProfile.bio || '');
+            setReadingGoal(newProfile.readingGoal || 0);
           }
         } catch (error) {
-            console.error("Error fetching profile:", error);
+            console.error("Error fetching/creating profile:", error);
             setProfile(null);
         }
 
@@ -91,37 +117,48 @@ export default function ProfilePage() {
   }, [user, authLoading]);
 
 
-  const stats = useMemo(() => {
-    const totalBooks = books.length;
-    const booksCompleted = books.filter(b => b.status === 'completed').length;
-    const ratedBooks = books.filter(b => typeof b.rating === 'number' && b.rating > 0);
-    const averageRating = ratedBooks.length > 0 
-      ? ratedBooks.reduce((acc, b) => acc + b.rating!, 0) / ratedBooks.length
-      : 0;
-
-    return {
-      totalBooks,
-      booksCompleted,
-      averageRating: averageRating.toFixed(1)
-    };
-  }, [books]);
-
+  const stats: ReadingStats = useMemo(() => {
+    return calculateReadingStats(books, profile || undefined);
+  }, [books, profile]);
 
   const handleGenreChange = (genre: string) => {
     setSelectedGenre(genre);
   };
 
+  const handleUpdateReadingGoal = async (goal: number) => {
+    if (!user) return;
+
+    const userDocRef = doc(db, 'users', user.uid);
+    await updateDoc(userDocRef, {
+      readingGoal: goal,
+      currentYear: new Date().getFullYear(),
+    });
+    setProfile((prev) => (prev ? { ...prev, readingGoal: goal } : null));
+    setReadingGoal(goal);
+  };
+
   const handleSaveChanges = async () => {
-    if (!user || !selectedGenre) return;
+    if (!user || !selectedGenre || !username.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setIsSaving(true);
     try {
       const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, {
+      const updateData: Partial<UserProfile> = {
         favoriteGenre: selectedGenre,
-      });
+        username: username.trim(),
+        bio: bio.trim(),
+      };
+
+      await updateDoc(userDocRef, updateData);
       setTheme(selectedGenre.toLowerCase() as any);
-      setProfile((prev) => (prev ? { ...prev, favoriteGenre: selectedGenre } : null));
+      setProfile((prev) => (prev ? { ...prev, ...updateData } : null));
       toast({
         title: 'Success!',
         description: 'Your profile has been updated.',
@@ -138,7 +175,7 @@ export default function ProfilePage() {
     }
   };
 
-  const userInitial = profile?.email ? profile.email.charAt(0).toUpperCase() : '?';
+  const userInitial = profile?.username ? profile.username.charAt(0).toUpperCase() : (profile?.email ? profile.email.charAt(0).toUpperCase() : '?');
 
   const ProfileSkeleton = () => (
     <div className="space-y-6">
@@ -196,22 +233,148 @@ export default function ProfilePage() {
         </div>
 
         {profile ? (
-          <>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-               <Card className="lg:col-span-1">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-20 w-20">
-                      <AvatarImage src="" alt={profile.email} />
-                      <AvatarFallback>{userInitial}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-2xl">{profile.email}</CardTitle>
-                      <CardDescription>Reader Extraordinaire</CardDescription>
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="overview" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="stats" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Statistics
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-3">
+                {/* Profile Card */}
+                <Card className="md:col-span-1">
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-20 w-20">
+                        <AvatarImage src="" alt={profile.username} />
+                        <AvatarFallback>{userInitial}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-xl truncate">{profile.username}</CardTitle>
+                        <CardDescription className="text-sm truncate">{profile.email}</CardDescription>
+                        {profile.joinedDate && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Joined {profile.joinedDate.toDate().toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {profile.bio && (
+                      <div>
+                        <Label className="text-xs font-medium">Bio</Label>
+                        <p className="text-sm text-muted-foreground mt-1">{profile.bio}</p>
+                      </div>
+                    )}
+                    <div>
+                      <Label className="text-xs font-medium">Favorite Genre</Label>
+                      <p className="text-sm mt-1">{profile.favoriteGenre}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Reading Goal Card */}
+                <div className="md:col-span-2">
+                  <ReadingGoalManager 
+                    profile={profile} 
+                    stats={stats} 
+                    onUpdateGoal={handleUpdateReadingGoal} 
+                  />
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Books</CardTitle>
+                    <BookOpenCheck className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.totalBooks}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Completed</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.booksCompleted}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
+                    <Star className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.averageRating}</div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">This Year</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.booksThisYear}</div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="stats" className="space-y-6">
+              <ReadingStatsDisplay stats={stats} profile={profile} />
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Settings</CardTitle>
+                  <CardDescription>Update your profile information and preferences.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Enter your username"
+                      maxLength={30}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea
+                      id="bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Tell us about yourself and your reading preferences..."
+                      maxLength={200}
+                      rows={3}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {bio.length}/200 characters
+                    </p>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="favorite-genre">Favorite Genre (Theme)</Label>
                     <Select onValueChange={handleGenreChange} value={selectedGenre}>
@@ -236,46 +399,8 @@ export default function ProfilePage() {
                   </Button>
                 </CardContent>
               </Card>
-
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle>Reading Stats</CardTitle>
-                  <CardDescription>Your reading journey in numbers.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Books</CardTitle>
-                        <BookOpenCheck className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalBooks}</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Books Completed</CardTitle>
-                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{stats.booksCompleted}</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
-                        <Star className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{stats.averageRating}</div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </>
+            </TabsContent>
+          </Tabs>
         ) : (
           <p>Could not load profile. If you've just signed up, please try refreshing the page.</p>
         )}

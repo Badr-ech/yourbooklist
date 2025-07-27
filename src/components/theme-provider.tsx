@@ -72,10 +72,22 @@ export function ThemeProvider({
           const userDocRef = doc(db, 'users', user.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            const favoriteGenre = userDoc.data()?.favoriteGenre?.toLowerCase() as Theme;
-            if (favoriteGenre) {
-              setThemeState(favoriteGenre);
-            }
+            const favoriteGenre = userDoc.data()?.favoriteGenre?.toLowerCase();
+            // Map genre names to theme names
+            const genreToTheme: { [key: string]: Theme } = {
+              'fantasy': 'fantasy',
+              'romance': 'romance', 
+              'sci-fi': 'scifi',
+              'science fiction': 'scifi',
+              'horror': 'horror',
+              'thriller': 'thriller',
+              'historical': 'historical',
+              'mystery': 'thriller', // Map mystery to thriller
+              'crime': 'thriller',   // Map crime to thriller
+            };
+            
+            const mappedTheme = genreToTheme[favoriteGenre] || 'fantasy';
+            setThemeState(mappedTheme);
           }
         } catch (e) {
           console.error("Failed to fetch user theme", e);
