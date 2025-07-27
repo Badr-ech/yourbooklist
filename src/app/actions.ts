@@ -29,7 +29,6 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
   try {
     const bookRef = doc(db, 'users', userId, 'books', book.id);
     
-    // Explicitly construct the data object to avoid undefined or invalid fields
     const bookData: any = {
       id: book.id,
       title: book.title,
@@ -38,7 +37,7 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
       status: book.status,
       genre: book.genre,
       description: book.description || null,
-      dateAdded: serverTimestamp(), // Ensures this field is always present for sorting
+      dateAdded: serverTimestamp(),
     };
     
     if (typeof book.rating === 'number' && !isNaN(book.rating)) {
@@ -53,6 +52,9 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
         bookData.endDate = Timestamp.fromDate(new Date(book.endDate));
     }
 
+    // Using { merge: true } is a safe way to update documents.
+    // It creates the document if it doesn't exist, or merges the new data
+    // with an existing document without overwriting the entire thing.
     await setDoc(bookRef, bookData, { merge: true });
     
     return { success: true };
@@ -96,7 +98,7 @@ export async function handleGoogleSignIn({ uid, email }: { uid: string; email: s
       await setDoc(userDocRef, {
         uid: uid,
         email: email,
-        favoriteGenre: 'Fantasy', // Default genre for new Google users
+        favoriteGenre: 'Fantasy',
       });
     }
     return { success: true };
