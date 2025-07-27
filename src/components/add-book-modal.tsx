@@ -24,13 +24,20 @@ interface AddBookModalProps {
   onClose: () => void;
   book: Book;
   onAddBook: (details: BookClient) => Promise<void>;
+  initialData?: Book | null;
 }
 
-export function AddBookModal({ isOpen, onClose, book, onAddBook }: AddBookModalProps) {
-  const [status, setStatus] = useState<BookStatus>('plan-to-read');
-  const [rating, setRating] = useState<number | undefined>(undefined);
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+export function AddBookModal({ isOpen, onClose, book, onAddBook, initialData }: AddBookModalProps) {
+  const [status, setStatus] = useState<BookStatus>(initialData?.status || 'plan-to-read');
+  const [rating, setRating] = useState<number | undefined>(initialData?.rating || undefined);
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    initialData?.startDate instanceof Date ? initialData.startDate : 
+    initialData?.startDate ? new Date() : undefined
+  );
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    initialData?.endDate instanceof Date ? initialData.endDate : 
+    initialData?.endDate ? new Date() : undefined
+  );
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {

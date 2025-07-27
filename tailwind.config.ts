@@ -13,6 +13,12 @@ export default {
         body: ['Inter', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
         code: ['monospace'],
+        cinzel: ['Cinzel', 'serif'],
+        dancing: ['Dancing Script', 'cursive'],
+        orbitron: ['Orbitron', 'monospace'],
+        creepster: ['Creepster', 'cursive'],
+        'source-code': ['Source Code Pro', 'monospace'],
+        playfair: ['Playfair Display', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

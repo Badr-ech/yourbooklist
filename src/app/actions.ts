@@ -45,11 +45,15 @@ export async function addBookToList({ userId, book }: { userId: string, book: Bo
     }
     
     if (book.startDate) {
-        bookData.startDate = Timestamp.fromDate(new Date(book.startDate));
+        bookData.startDate = book.startDate instanceof Date ? 
+            Timestamp.fromDate(book.startDate) : 
+            book.startDate;
     }
     
     if (book.endDate) {
-        bookData.endDate = Timestamp.fromDate(new Date(book.endDate));
+        bookData.endDate = book.endDate instanceof Date ? 
+            Timestamp.fromDate(book.endDate) : 
+            book.endDate;
     }
 
     // Using { merge: true } is a safe way to update documents.
