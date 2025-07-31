@@ -297,7 +297,7 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
     // Title similarity (medium weight)
     const titleWords = originalTitle.toLowerCase().split(' ');
     const candidateTitleWords = candidateBook.title.toLowerCase().split(' ');
-    const titleOverlap = titleWords.filter(word => candidateTitleWords.some(cw => cw.includes(word) || word.includes(cw))).length;
+    const titleOverlap = titleWords.filter(word => candidateTitleWords.some((cw: string) => cw.includes(word) || word.includes(cw))).length;
     score += titleOverlap * 10;
     
     // Description similarity (medium weight)
