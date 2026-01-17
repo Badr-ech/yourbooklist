@@ -8,12 +8,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { Logo } from '@/components/logo';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
-import { handleGoogleSignIn } from '../actions';
 import { Separator } from '@/components/ui/separator';
 import { FaGoogle } from 'react-icons/fa';
 
@@ -51,10 +51,18 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      const res = await handleGoogleSignIn({ uid: user.uid, email: user.email });
-      if (!res.success) {
-        setError(res.error);
-        return;
+      // Handle user profile creation on the client side
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      // Create user document if it doesn't exist
+      if (!userDocSnap.exists()) {
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          email: user.email,
+          favoriteGenre: 'Fantasy',
+          createdAt: serverTimestamp(),
+        });
       }
 
       toast({
@@ -63,7 +71,7 @@ export default function LoginPage() {
       });
       router.push('/dashboard');
     } catch (err: any) {
-      console.error(err);
+      console.error('Error handling Google sign-in:', err);
       setError('Failed to sign in with Google. Please try again.');
     }
   };

@@ -104,17 +104,18 @@ export default function Home() {
               </div>
 
               {/* Books Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                 {filteredBooks.map((book) => (
                   <Card key={book.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <CardHeader className="p-0">
-                      <div className="relative aspect-[2/3] w-full">
+                      <div className="relative aspect-[2/3] w-full bg-muted">
                         <Image
-                          src={book.coverImage || 'https://placehold.co/300x450.png'}
+                          src={book.coverImage || 'https://covers.openlibrary.org/b/id/8514811-L.jpg'}
                           alt={book.title}
                           fill
                           className="object-cover"
-                          data-ai-hint={`book cover for ${book.title}`}
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                          priority={false}
                         />
                       </div>
                     </CardHeader>

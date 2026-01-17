@@ -10,9 +10,29 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  width: 100vw;
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   transition: all 0.3s ease;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  width: 100%;
+  min-height: 100vh;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 @layer base {
