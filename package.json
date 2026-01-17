@@ -44,11 +44,7 @@
     "firebase": "^11.9.1",
     "genkit": "^1.14.1",
     "lucide-react": "^0.475.0",
-<<<<<<< HEAD
-    "next": "^15.1.6",
-=======
-    "next": "15.3.8",
->>>>>>> 420cef3ac9b33f3f30388c2a35f9b9a1b1377b3c
+    "next": "15.5.9",
     "patch-package": "^8.0.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
