@@ -1,9 +1,8 @@
 # 📚 YourBookList
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Badr-ech/yourbooklist)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> 🚀 **Live Demo:** [Coming Soon - Deploy your own!]
+> 🚀 **Live Demo:** yourbooklist-xi.vercel.app
 
 YourBookList is a modern web application for book lovers to organize, track, and discover books. Inspired by platforms like Goodreads and MyAnimeList, it offers a rich set of features for personal book management, social connections, and smart recommendations.
 
